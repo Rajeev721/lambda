@@ -23,19 +23,11 @@ def create_dynamo(*args):
                 {
                     'AttributeName':"id",
                     'KeyType':'HASH'
-                },
-                {
-                    'AttributeName':"filename",
-                    'KeyType':'RANGE'
                 }
             ],
             AttributeDefinitions = [
                 {
                     'AttributeName':"id",
-                    'AttributeType':'S'
-                },
-                {
-                    'AttributeName':"filename",
                     'AttributeType':'S'
                 }
             ]
@@ -46,12 +38,25 @@ def create_dynamo(*args):
         waiter.wait(TableName=table_name)
         print('Table created:', response['TableDescription']['TableArn'])
 
+def create_s3(*args):
+    s3_name = args[0]
+    s3 = create_client('s3')
+    buckets_list = s3.list_buckets()['ResponseMetadata']['Buckets']
+    if s3_name in buckets_list:
+        print("The S3 buckets is already available")
+    else:
+        try:
+            s3.create_bucket(Bucket=s3_name, CreateBucketConfiguration = {'LocationConstraint': 'us-east-2'})
+        except Exception as e:
+            print(e)
 if __name__ == "__main__":
-    pass
+    # pass
 # create_dynamo('ghactivity')
-    # from configparser import ConfigParser
-    # conf = ConfigParser()
-    # conf.read('config.ini')
-    # print(conf.sections())
-    # if conf.has_section('S3'):
-    #     items = conf.items('S3')
+# create_s3('ghactivity-rajeev')
+    from configparser import ConfigParser
+    conf = ConfigParser()
+    conf.read('config.ini')
+    print(conf.sections())
+    if conf.has_section('S3'):
+        items = dict(conf.items('S3'))
+        print(items['bucketname'])
