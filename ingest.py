@@ -2,8 +2,6 @@ from datetime import datetime as dt
 from datetime import timedelta as td
 import uuid
 import boto3
-import requests as rq
-
 from infra import create_client
 # from uuid import uuid5
 
@@ -37,10 +35,12 @@ def update_dynamo(id, filename, update_date,message,run_status):
                                            ':val3': {'S': run_status},
                                            }
                 )
-        
+def get_latest_filename():
+        pass        
 def file_ingest():
         s3 = create_client('s3')
-        n = int(input("how many latest files you want to ingest: "))
+        # n = int(input("how many latest files you want to ingest: "))
+        n = 5
         for i in range(n, 0 , -1):
                 file_name = f'{dt.strftime(dt.now() - td(hours = i),"%Y-%m-%d-%-H") + ".json.gz"}'
                 id = str(uuid.uuid4())
@@ -56,8 +56,8 @@ def file_ingest():
                         message = str(a)
                         run_status = 'Completed'
                 except Exception as e:
-                        status = 'Failed'
-                        run_status = str(e)
+                        run_status = 'Failed'
+                        message = str(e)
                 finally:
                         update_dynamo(id, file_name, dt.now().strftime("%Y%m%d%H%M%s"), message, run_status)
 

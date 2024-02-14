@@ -128,7 +128,7 @@ ENV/
 env.bak/
 venv.bak/
 lambda_venv
-
+dep
 # Spyder project settings
 .spyderproject
 .spyproject
