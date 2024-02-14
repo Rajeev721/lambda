@@ -84,9 +84,7 @@ def delete_resources(table_name = None, bucket = None):
             response = s3.delete_bucket(Bucket=bucket)
             del_resp[bucket] = response
 
-if __name__ == "__main__":
-    # pass
-
+def creating_objects():
     from configparser import ConfigParser
     conf = ConfigParser()
     conf.read('config.ini')
@@ -107,3 +105,6 @@ if __name__ == "__main__":
     print("Creating the resources...")
     create_dynamo(table_name)
     create_s3(bucket)
+if __name__ == "__main__":
+    # pass
+    creating_objects()
