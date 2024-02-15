@@ -37,8 +37,6 @@ def update_dynamo(id, filename, update_date,message,run_status):
                                            ':val3': {'S': run_status},
                                            }
                 )
-def get_latest_filename():
-        pass        
 def file_ingest():
         creating_objects()
         s3 = create_client('s3')
