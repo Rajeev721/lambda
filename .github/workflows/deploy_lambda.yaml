@@ -1,0 +1,62 @@
+name: Deploy Lamba Function With GHA and CF
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches: ["master"]
+    types: [opened,reopened]
+  workflow_dispatch:
+env:
+  region: "us-east-2"
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID}}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: set up python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: creating the package
+        run: |
+          echo "creating the dependecy package for lambda"
+          mkdir ghactivity_lambda
+          pip install -r requirements.txt -t ghactivity_lambda
+          cp infra.py ingest.py config.ini lambda_hand.py ghactivity_lambda/
+          cd ghactivity_lambda
+
+          zip -r ghactivity_lambda.zip .
+      
+      - name: Upload artifact to S3
+        uses: actions/upload-artifact@v4
+        with:
+          name: ghactivity_lambda
+          path: ghactivity_lambda.zip
+
+  deploy:
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ghactivity_lambda
+      - name: get AWS creds
+        uses: aws-actions/get-aws-credentials@v2
+        with:
+          aws-access-key-id: AWS_ACCESS_KEY_ID
+          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+          aws-region: region
+      - name: upload files to s3
+        run: |
+          aws s3 cp ghactivity_lambda.zip s3://learning-aws-siri/ghactivity_lambda.zip --sse
+          aws lambda update-function-code --publish --function-name ghactivity --region us-east-2 --s3-bucket learning-aws-siri --s3-key ghactivity_lambda.zip
+
+
+
+
