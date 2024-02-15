@@ -62,6 +62,7 @@ def file_ingest():
                         message = str(e)
                 finally:
                         update_dynamo(id, file_name, dt.now().strftime("%Y%m%d%H%M%s"), message, run_status)
+        return message
 
 if __name__ == "__main__":
         file_ingest()
