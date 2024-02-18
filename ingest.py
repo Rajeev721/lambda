@@ -6,7 +6,7 @@ from infra import create_client,creating_objects
 import requests as rq
 # from uuid import uuid5
 
-def insert_dynamo(id, filename, insert_date):
+def insert_dynamo(table_name, id, filename, insert_date):
         dy = create_client('dynamodb')
         
         """
@@ -20,16 +20,16 @@ def insert_dynamo(id, filename, insert_date):
         #                       )
         # print(tbl.scan())
         """
-        dy.put_item(TableName='ghactivity',
+        dy.put_item(TableName=table_name,
                 Item = {'id' : {"S":id},
                         'filename': {"S":filename},
                         'start_time':{'N': insert_date}
                         }
                     )
 
-def update_dynamo(id, filename, update_date,message,run_status):
+def update_dynamo(table_name, id, filename, update_date,message,run_status):
         dy = create_client('dynamodb')
-        dy.update_item(TableName='ghactivity',
+        dy.update_item(TableName=table_name,
                 Key={'id' : {"S":id}},
                 UpdateExpression='SET update_time = :val1, message = :val2, run_status = :val3',
                 ExpressionAttributeValues={':val1': {'N': update_date},
@@ -37,21 +37,32 @@ def update_dynamo(id, filename, update_date,message,run_status):
                                            ':val3': {'S': run_status},
                                            }
                 )
-def file_ingest():
-        creating_objects()
+def config_details(env):
+        from configparser import ConfigParser
+        conf = ConfigParser()
+        conf.read('config.ini')
+        if conf.has_section(env):
+                items = dict(conf.items(env))
+                bucket = items['bucketname']
+                table_name = items['tablename']
+        return bucket,table_name       
+
+def file_ingest(env):
+        # creating_objects()
+        
+        bucket_name, table_name = config_details(env)
         s3 = create_client('s3')
-        # n = int(input("how many latest files you want to ingest: "))
         n = 5
         for i in range(n, 0 , -1):
                 file_name = f'{dt.strftime(dt.now() - td(hours = i),"%Y-%m-%d-%-H") + ".json.gz"}'
                 print(file_name)
                 id = str(uuid.uuid4())
                 start_time = dt.now().strftime("%Y%m%d%H%M%s")
-                insert_dynamo(id, file_name,  start_time)
+                insert_dynamo(table_name, id, file_name,  start_time)
                 try:
                         res = rq.get(f'https://data.gharchive.org/{file_name}')
                         a = s3.put_object(
-                                Bucket = 'ghactivity-rajeev',
+                                Bucket = bucket_name,
                                 Key = file_name,
                                 Body = res.content
                         )
@@ -61,8 +72,5 @@ def file_ingest():
                         run_status = 'Failed'
                         message = str(e)
                 finally:
-                        update_dynamo(id, file_name, dt.now().strftime("%Y%m%d%H%M%s"), message, run_status)
+                        update_dynamo(table_name, id, file_name, dt.now().strftime("%Y%m%d%H%M%s"), message, run_status)
         return message
-
-if __name__ == "__main__":
-        file_ingest()

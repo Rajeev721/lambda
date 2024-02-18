@@ -13,6 +13,7 @@ env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID}}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
 jobs:
+  
   build:
     runs-on: ubuntu-latest
     steps:
@@ -26,7 +27,7 @@ jobs:
           echo "creating the dependecy package for lambda"
           mkdir ghactivity_lambda
           pip install -r requirements.txt -t ghactivity_lambda
-          cp infra.py ingest.py config.ini lambda_hand.py ghactivity_lambda/
+          cp ingest.py config.ini lambda_hand.py ghactivity_lambda/
           cd ghactivity_lambda
           zip -r ghactivity_lambda.zip .
           pwd
@@ -37,6 +38,32 @@ jobs:
         with:
           name: ghactivity_lambda
           path: ghactivity_lambda.zip
+  terraform-steup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: check out repo
+        uses: actions/checkout@v4
+
+      - name: get AWS creds
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{env.AWS_ACCESS_KEY_ID}}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY}}
+          aws-region: ${{ env.region}}
+      - name: set up terraform
+        uses: hashicorp/setup-terraform@v1
+      
+      - name: create resources
+        id: creating the required resources in s3
+
+        run: |
+          cd terraform
+          terraform --version
+          terraform init --backend-config=dev-backend.tfvars
+          terraform plan -var-file=dev.tfvars
+          terraform apply -var-file=dev.tfvars --auto-approve
+          echo "stack has been created or updated properly"
+
 
   deploy:
     needs: [build]
@@ -55,7 +82,7 @@ jobs:
           aws-region: ${{ env.region}}
       - name: upload files to s3
         run: |
-          aws s3 cp ghactivity_lambda.zip s3://learning-aws-siri/ghactivity_lambda.zip --sse
+          aws s3 cp ghactivity_lambda.zip s3://learning-aws-siri/dev/ghactivity_lambda.zip --sse
           aws lambda update-function-code --publish --function-name ghactivity --region us-east-2 --s3-bucket learning-aws-siri --s3-key ghactivity_lambda.zip
 
 
