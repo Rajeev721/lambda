@@ -38,7 +38,7 @@ jobs:
           name: ghactivity_lambda
           path: ghactivity_lambda.zip
   terraform-steup:
-  needs: [build]
+    needs: [build]
     runs-on: ubuntu-latest
     steps:
       - name: check out repo
@@ -63,7 +63,6 @@ jobs:
           terraform plan -var-file=dev.tfvars
           terraform apply -var-file=dev.tfvars --auto-approve
           echo "stack has been created or updated properly"
-
 
   deploy:
     needs: [build, terraform-steup]
