@@ -52,8 +52,8 @@ jobs:
 
         run: |
           cd terraform
-          chmod +x run_terraform.sh
-          ./run_terraform.sh
+          chmod +x terra.sh
+          ./terra.sh
 
   deploy:
     needs: [build]
