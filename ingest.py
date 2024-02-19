@@ -2,7 +2,7 @@ from datetime import datetime as dt
 from datetime import timedelta as td
 import uuid
 import boto3
-from infra import create_client,creating_objects
+# from infra import create_client,creating_objects
 import requests as rq
 # from uuid import uuid5
 
@@ -51,8 +51,9 @@ def file_ingest(env):
         # creating_objects()
         
         bucket_name, table_name = config_details(env)
+        print(bucket_name, table_name)
         s3 = create_client('s3')
-        n = 5
+        n = 2
         for i in range(n, 0 , -1):
                 file_name = f'{dt.strftime(dt.now() - td(hours = i),"%Y-%m-%d-%-H") + ".json.gz"}'
                 print(file_name)
