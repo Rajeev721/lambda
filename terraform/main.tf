@@ -53,8 +53,7 @@ resource "aws_lambda_function" "ghactivity_func" {
   role          = "arn:aws:iam::800832583424:role/service-role/ghactivity-role-6vfr37ay"
 
   # Replace "path/to/your/lambda.zip" with the actual path to your Lambda deployment package
-  s3_bucket = "learning-aws-siri"
-  s3_key = "/dev/ghactivity_lambda.zip"
+  filename = "/home/runner/work/lambda/lambda/ghactivity_lambda.zip"
 
   environment {
     variables = {
