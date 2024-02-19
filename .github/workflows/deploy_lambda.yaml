@@ -37,7 +37,7 @@ jobs:
         with:
           name: ghactivity_lambda
           path: ghactivity_lambda.zip
-          
+
       - name: get AWS creds
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -56,7 +56,7 @@ jobs:
           ./run_terraform.sh
 
   deploy:
-    needs: [build, terraform-steup]
+    needs: [build]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
