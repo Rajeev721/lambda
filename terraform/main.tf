@@ -34,11 +34,6 @@ resource "aws_dynamodb_table" "metadata_table"{
       type = "N"
     }
 
-    ttl {
-      attribute_name =  "TimeToExist"
-      enabled = false
-    }
-
     tags = {
         name = "metadata-table"
         environment = var.environment
