@@ -27,10 +27,10 @@ def insert_dynamo(table_name, id, filename, insert_date):
                         }
                     )
 
-def update_dynamo(table_name, id, filename, update_date,message,run_status):
+def update_dynamo(table_name, id, filename,start_time, update_date,message,run_status):
         dy = create_client('dynamodb')
         dy.update_item(TableName=table_name,
-                Key={'id' : {"S":id}},
+                Key={'id' : {"S":id}, 'start_time' : {'N': start_time}},
                 UpdateExpression='SET update_time = :val1, message = :val2, run_status = :val3',
                 ExpressionAttributeValues={':val1': {'N': update_date},
                                            ':val2': {'S': message},
@@ -73,5 +73,5 @@ def file_ingest(env):
                         run_status = 'Failed'
                         message = str(e)
                 finally:
-                        update_dynamo(table_name, id, file_name, dt.now().strftime("%Y%m%d%H%M%s"), message, run_status)
+                        update_dynamo(table_name, id, file_name,start_time, dt.now().strftime("%Y%m%d%H%M%s"), message, run_status)
         return message
