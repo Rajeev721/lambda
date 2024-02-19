@@ -49,6 +49,8 @@ resource "aws_lambda_function" "ghactivity_func" {
 
   # Replace "path/to/your/lambda.zip" with the actual path to your Lambda deployment package
   filename = "/home/runner/work/lambda/lambda/ghactivity_lambda.zip"
+  timeout = 90
+  memory_size = 512
 
   environment {
     variables = {
