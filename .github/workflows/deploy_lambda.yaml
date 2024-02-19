@@ -26,7 +26,7 @@ jobs:
           echo "creating the dependecy package for lambda"
           mkdir ghactivity_lambda
           pip install -r requirements.txt -t ghactivity_lambda
-          cp ingest.py config.ini lambda_hand.py ghactivity_lambda/
+          cp infra.py ingest.py config.ini lambda_hand.py ghactivity_lambda/
           cd ghactivity_lambda
           zip -r ghactivity_lambda.zip .
           pwd
