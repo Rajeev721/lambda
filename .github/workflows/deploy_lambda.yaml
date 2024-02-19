@@ -39,6 +39,7 @@ jobs:
           name: ghactivity_lambda
           path: ghactivity_lambda.zip
   terraform-steup:
+  needs: [build]
     runs-on: ubuntu-latest
     steps:
       - name: check out repo
@@ -54,7 +55,7 @@ jobs:
         uses: hashicorp/setup-terraform@v1
       
       - name: create resources
-        id: creating the required resources in s3
+        id: creating_resources
 
         run: |
           cd terraform
@@ -66,7 +67,7 @@ jobs:
 
 
   deploy:
-    needs: [build]
+    needs: [build, terraform-steup]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
